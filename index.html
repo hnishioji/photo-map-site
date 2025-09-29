@@ -174,6 +174,8 @@
     </div>
 
     <script>
+    console.log("---- Script Start ----"); // これが一番最初に表示されるか確認
+
         // JavaScriptコード
         const MAP_WIDTH = 1024;
         const MAP_HEIGHT = 535;
@@ -187,24 +189,25 @@
          * 必要なJSONデータをすべて読み込む
          */
         async function loadData() {
-            try {
-                // positions.jsonの読み込み
-                const posResponse = await fetch('positions.json');
-                positions = await posResponse.json();
+       console.log("loadData関数が実行されました。"); // 追加
+        try {
+            // ... (positions.jsonの読み込み部分) ...
+            console.log("positions.jsonの読み込み成功。地点数:", Object.keys(positions).length); // 成功ログ追加
 
-                // photos.jsonの読み込み
-                const photoResponse = await fetch('photos.json');
-                photoFiles = await photoResponse.json();
+            // ... (photos.jsonの読み込み部分) ...
+            console.log("photos.jsonの読み込み成功。ファイル数:", photoFiles.length); // 成功ログ追加
 
-                // データを処理
-                processPhotoFiles(photoFiles);
+            processPhotoFiles(photoFiles);
+            console.log("processPhotoFilesが完了しました。"); // 追加
 
-                // マーカーを表示
-                renderMarkers();
-            } catch (error) {
-                console.error("データの読み込み中にエラーが発生しました:", error);
-            }
+            renderMarkers();
+            console.log("renderMarkersが完了しました。"); // 追加
+
+        } catch (error) {
+            // ...
+            console.error("データの読み込み中にエラーが発生しました:", error);
         }
+    }
 
         /**
          * 写真ファイル名を解析し、地点(AA)と方向(X)で構造化
@@ -247,25 +250,34 @@
         /**
          * 地図上に撮影地点マーカー(AA)を表示
          */
-        function renderMarkers() {
-            const mapContainer = document.getElementById('map-container');
-            
-            for (const aa in positions) {
-                const pos = positions[aa];
-                
-                const marker = document.createElement('div');
-                marker.classList.add('marker');
-                marker.textContent = aa;
-                marker.style.left = `${pos.xPct * MAP_WIDTH / 100}px`;
-                marker.style.top = `${pos.yPct * MAP_HEIGHT / 100}px`;
-                marker.dataset.aa = aa;
-                
-                marker.addEventListener('click', () => showDirectionDialog(aa));
-                
-                mapContainer.appendChild(marker);
-            }
+     function renderMarkers() {
+        console.log("renderMarkers関数が実行されました。"); // 追加
+        const mapContainer = document.getElementById('map-container');
+        if (!mapContainer) {
+            console.error("map-container要素が見つかりません！"); // 追加
+            return;
         }
 
+        if (Object.keys(positions).length === 0) {
+             console.warn("positionsデータが空のため、マーカーは表示されません。");
+             return;
+        }
+        for (const aa in positions) {
+            const pos = positions[aa];
+
+            const marker = document.createElement('div');
+            marker.classList.add('marker');
+            marker.textContent = aa;
+            marker.style.left = `${pos.xPct * MAP_WIDTH / 100}px`;
+            marker.style.top = `${pos.yPct * MAP_HEIGHT / 100}px`;
+            marker.dataset.aa = aa;
+
+            marker.addEventListener('click', () => showDirectionDialog(aa));
+
+            mapContainer.appendChild(marker);
+            console.log(`マーカー追加: ${aa} at (${marker.style.left}, ${marker.style.top})`); // 追加
+        }
+    }
         /**
          * 地点(AA)に所属する方向(X)の選択ダイアログを表示
          */
