@@ -31,7 +31,6 @@
 </head>
 <body>
 <header>
-  <label>地図画像: <input id="mapFile" type="file" accept="image/*"></label>
   <label>写真フォルダ選択: <input id="photos" type="file" webkitdirectory directory multiple></label>
   <button id="resetBtn">読み込みクリア</button>
   <button id="toggleEdit">編集モード（オフ）</button>
@@ -39,9 +38,8 @@
 </header>
 
 <div id="mapContainer" style="max-width:var(--maxWidth);">
-  <img id="mapImage" src="" alt="map image" />
+  <img id="mapImage" src="map.png" alt="map" />
 </div>
-
 <!-- 情報パネル -->
 <div id="infoPanel" class="panel" style="display:none;">
   <div style="font-weight:700">地点: <span id="infoAA"></span></div>
