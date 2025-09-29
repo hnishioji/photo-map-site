@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Photo Map</title>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+    #mapContainer {
+      position: relative;
+      display: inline-block;
+    }
+    #mapImage {
+      max-width: 100%;
+      height: auto;
+    }
+    .marker {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: red;
+      border-radius: 50%;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+      opacity: 0.7;
+    }
+    .thumbnail {
+      position: absolute;
+      border: 2px solid #666;
+      background: #fff;
+      padding: 2px;
+      z-index: 100;
+    }
+    .thumbnail img {
+      max-width: 120px;
+      max-height: 120px;
+      display: block;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal img {
+      max-width: 90%;
+      max-height: 90%;
+    }
+  </style>
+</head>
+<body>
+  <h1>Photo Map</h1>
+
+  <div id="mapContainer">
+    <!-- 固定の地図画像 -->
+    <img id="mapImage" src="map.png" alt="map">
+  </div>
+
+  <!-- モーダル（拡大表示用） -->
+  <div id="modal" class="modal">
+    <img id="modalImage" src="" alt="拡大画像">
+  </div>
+
+  <script>
+  // ======== 設定 =========
+  const regex = /^(\d{4})(\d{2})(\d{2})_(\d{2})-([NESW]{1,2})(?:-(\d{2}))?\.jpe?g$/i;
+  let imagesByAA = {};
+  let positions = {};
+
+  // ======== positions.json を読み込み =========
+  fetch("positions.json")
+    .then(r => r.json())
+    .then(data => {
+      positions = data;
+      console.log("位置データ読込完了", positions);
+      return fetch("photos.json");
+    })
+    .then(r => r.json())
+    .then(files => {
+      files.forEach(name => {
+        const m = name.match(regex);
+        if (!m) return;
+        const [_, YYYY, MM, DD, AA, DIR, SEQ] = m;
+        const displayDate = `${YYYY.slice(-2)}${MM}${DD}`;
+        const url = `photos/${name}`;
+        const entry = {
+          name,
+          url,
+          date: `${YYYY}${MM}${DD}`,
+          dateShort: displayDate,
+          seq: SEQ || null
+        };
+        if (!imagesByAA[AA]) imagesByAA[AA] = {};
+        if (!imagesByAA[AA][DIR]) imagesByAA[AA][DIR] = [];
+        imagesByAA[AA][DIR].push(entry);
+      });
+      console.log("写真データ読込完了", imagesByAA);
+      renderAllMarkers();
+    });
+
+  // ======== マーカーを地図に配置 =========
+  function renderAllMarkers() {
+    const container = document.getE
