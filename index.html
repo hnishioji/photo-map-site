@@ -1,399 +1,418 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Map Site</title>
-    <style>
-        /* CSSで基本的なスタイルを設定 */
-        #map-container {
-            position: relative;
-            display: inline-block; /* 地図のサイズに合わせる */
-        }
-        #map-image {
-            display: block;
-            width: 1024px; /* map.pngの幅 */
-            height: 535px; /* map.pngの高さ */
-        }
-        .marker {
-            position: absolute;
-            background-color: red;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            text-align: center;
-            line-height: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-            transform: translate(-50%, -50%); /* 中央寄せ */
-            z-index: 10;
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>写真地図ビューワ</title>
+<style>
+  :root{ --map-width:1024px; --marker-size:34px; --thumb-max:140px; }
+  body{ font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN","メイリオ",sans-serif; margin:12px; background:#f7f7f8; color:#222; }
+  header{ margin-bottom:8px; }
+  h1{ margin:6px 0 12px 0; font-size:18px; }
+  #mapContainer{ position:relative; width:100%; max-width:var(--map-width); border:1px solid #ddd; background:#fff; overflow:visible; }
+  #mapImage{ display:block; width:100%; height:auto; user-select:none; -webkit-user-drag:none; }
 
-        /* 方向選択ダイアログとサムネイル表示エリア */
-        #dialog-container {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            background-color: #f9f9f9;
-            display: none; /* 初期状態では非表示 */
-        }
-        .direction-button {
-            padding: 5px 10px;
-            margin: 5px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 3px;
-        }
-        #thumbnails-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .thumbnail-item {
-            cursor: pointer;
-            border: 1px solid #ddd;
-            padding: 5px;
-            text-align: center;
-        }
-        .thumbnail-item img {
-            width: 150px; /* サムネイルのサイズ */
-            height: auto;
-            display: block;
-        }
-        .thumbnail-item span {
-            font-size: 0.8em;
-            display: block;
-        }
+  /* マーカー */
+  .marker{
+    position:absolute;
+    transform:translate(-50%,-100%);
+    width:var(--marker-size); height:var(--marker-size);
+    border-radius:50%;
+    background:linear-gradient(#fff,#f6f6f6);
+    border:2px solid #444;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.15);
+    z-index:40;
+  }
+  .marker .aa{ pointer-events:none; font-size:13px; color:#111; }
 
-        /* モーダル表示用スタイル */
-        .modal {
-            display: none; /* 初期状態では非表示 */
-            position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.8);
-        }
-        .modal-content {
-            margin: 5% auto;
-            padding: 20px;
-            width: 90%;
-            max-width: 1400px;
-            background-color: #fefefe;
-            display: flex;
-            gap: 20px;
-        }
-        .modal-photo, .modal-map {
-            flex: 1;-
-            text-align: center;
-        }
-        .modal-photo img {
-            max-width: 100%;
-            height: auto;
-            border: 1px solid #ddd;
-        }
-        .modal-map-container {
-            position: relative;
-            width: 100%;
-            max-width: 1024px;
-            margin: 0 auto;
-        }
-        .modal-map-container img {
-            width: 100%;
-            height: auto;
-        }
-        .modal-marker {
-            position: absolute;
-            background-color: blue; /* モーダル用のマーカーの色を変える */
-            color: white;
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            text-align: center;
-            line-height: 25px;
-            font-size: 14px;
-            cursor: pointer;
-            border: 3px solid yellow;
-            transform: translate(-50%, -50%);
-            z-index: 110;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-    </style>
+  /* ホバーで出る方角パネル（ポップオーバー） */
+  .dirPopover{
+    position:absolute; z-index:80; display:none;
+    background:rgba(255,255,255,0.97); border:1px solid #ccc; border-radius:8px; padding:6px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.12);
+  }
+  .dirPopover .dirBtns{ display:flex; gap:6px; flex-wrap:wrap; }
+  .dirPopover button{ padding:6px 8px; font-weight:600; cursor:pointer; background:#fff; border:1px solid #bbb; border-radius:6px; }
+
+  /* サムネイルオーバーレイ（マーカー付近に重ねて表示） */
+  .thumbOverlay{
+    position:absolute; transform:translate(-50%,-50%); z-index:60;
+    display:flex; gap:8px; flex-direction:column; align-items:center;
+    pointer-events:auto;
+  }
+  .thumbRow{ display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start; justify-content:center; }
+  .thumbBox{ background:#fff; border:1px solid #ccc; padding:6px; border-radius:6px; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,0.12); }
+  .thumbBox img{ display:block; max-width:var(--thumb-max); height:auto; border-radius:4px; }
+  .thumbLabel{ text-align:center; font-size:12px; color:#222; margin-top:6px; }
+
+  /* モーダル（地図＋画像） */
+  .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:9999; padding:20px; }
+  .modal.open{ display:flex; }
+  .modalInner{ width:100%; max-width:1200px; max-height:90vh; background:#fff; border-radius:8px; overflow:auto; display:flex; gap:12px; padding:12px; box-sizing:border-box; }
+  .modalLeft{ width:45%; min-width:320px; position:relative; border:1px solid #ddd; }
+  .modalLeft img{ width:100%; height:auto; display:block; }
+  .modalRight{ width:55%; min-width:320px; display:flex; flex-direction:column; gap:8px; }
+  .modalMeta{ font-size:13px; color:#333; }
+  .modalThumbs{ display:flex; gap:8px; flex-wrap:wrap; max-height:60vh; overflow:auto; padding:6px; border-top:1px solid #eee; }
+  .modalThumbs img{ max-width:180px; height:auto; cursor:pointer; border:2px solid transparent; border-radius:4px; }
+  .modalClose{ position:absolute; right:8px; top:8px; z-index:95; }
+
+  footer{ margin-top:12px; font-size:13px; color:#666; }
+
+  /* 小さなレスポンシブ調整 */
+  @media (max-width:900px){
+    .modalInner{ flex-direction:column; }
+    .modalLeft, .modalRight{ width:100%; min-width:0; }
+  }
+</style>
 </head>
 <body>
+  <h1>写真地図ビューワ</h1>
 
-    <h1>小田急線鶴川駅の1974-1979年の写真</h1>
+  <div id="mapContainer">
+    <img id="mapImage" src="map.png" alt="map">
+    <!-- マーカー要素はここに追加 -->
+  </div>
 
-    <div id="map-container">
-        <img id="map-image" src="map.png" alt="地図">
+  <!-- 方角ポップオーバー -->
+  <div id="dirPopover" class="dirPopover" aria-hidden="true">
+    <div class="dirBtns" id="dirBtnsContainer"></div>
+  </div>
+
+  <!-- サムネイルオーバーレイ（動的に追加） -->
+  <!-- モーダル -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true">
+    <div class="modalInner" role="document">
+      <div class="modalLeft">
+        <button id="modalClose" class="modalClose">閉じる</button>
+        <img id="modalMap" src="map.png" alt="map in modal">
+        <!-- モーダル内のマーカー群（動的） -->
+      </div>
+      <div class="modalRight">
+        <div class="modalMeta" id="modalMeta"></div>
+        <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+          <img id="modalPhoto" src="" alt="photo" style="max-width:100%; max-height:60vh; border:1px solid #ccc; border-radius:6px;">
         </div>
-
-    <div id="dialog-container">
-        <h2>地点 <span id="current-aa"></span> の写真選択</h2>
-        <div id="direction-buttons">
-            </div>
-        <div id="thumbnails-container">
-            </div>
+        <div class="modalThumbs" id="modalThumbs"></div>
+      </div>
     </div>
+  </div>
 
-    <div id="photo-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <div class="modal-photo">
-                <h3>写真 (<span id="modal-photo-filename"></span>)</h3>
-                <img id="modal-photo-img" src="" alt="写真">
-            </div>
-            <div class="modal-map">
-                <h3>撮影位置</h3>
-                <div class="modal-map-container">
-                    <img id="modal-map-img" src="map.png" alt="地図">
-                    <div id="modal-map-marker" class="modal-marker"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <footer>
+    <div>ファイル名規則: <code>YYYYMMDD_AA-X(-BB).jpg</code></div>
+  </footer>
 
-    <script>
-    console.log("---- Script Start ----"); // これが一番最初に表示されるか確認
+<script>
+/* ---------- 仕様に合わせた実装（起動時に positions.json と photos.json を読み込む） ---------- */
 
-        // JavaScriptコード
-        const MAP_WIDTH = 1024;
-        const MAP_HEIGHT = 535;
-        const DIRECTIONS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+const mapContainer = document.getElementById('mapContainer');
+const mapImage = document.getElementById('mapImage');
+const dirPopover = document.getElementById('dirPopover');
+const dirBtnsContainer = document.getElementById('dirBtnsContainer');
+const modal = document.getElementById('modal');
+const modalMap = document.getElementById('modalMap');
+const modalPhoto = document.getElementById('modalPhoto');
+const modalMeta = document.getElementById('modalMeta');
+const modalThumbs = document.getElementById('modalThumbs');
+const modalClose = document.getElementById('modalClose');
 
-        let positions = {};
-        let photoFiles = [];
-        let photosByLocationAndDirection = {}; // {AA: {X: [file1, file2, ...]}} の構造
+const regex = /^(\d{4})(\d{2})(\d{2})_(\d{2})-([NESW]{1,2})(?:-(\d{2}))?\.jpe?g$/i;
+const directionsList = ["N","NE","E","SE","S","SW","W","NW"];
 
-        /**
-         * 必要なJSONデータをすべて読み込む
-         */
-        async function loadData() {
-       console.log("loadData関数が実行されました。"); // 追加
-        try {
-            // ... (positions.jsonの読み込み部分) ...
-            console.log("positions.jsonの読み込み成功。地点数:", Object.keys(positions).length); // 成功ログ追加
+let positions = {};       // from positions.json, keyed by "01"..."45", values {xPct,yPct}
+let photosList = [];      // from photos.json: array of filenames
+let imagesByAA = {};      // imagesByAA[AA][DIR] = [ {name,url,date,dateShort,seq} ]
+let markerElems = {};     // main map markers by AA
+let modalMarkerElems = {}; // modal map markers by AA
 
-            // ... (photos.jsonの読み込み部分) ...
-            console.log("photos.jsonの読み込み成功。ファイル数:", photoFiles.length); // 成功ログ追加
+// Utility: safe parse float
+function toNum(v){ const n = parseFloat(v); return isNaN(n) ? null : n; }
 
-            processPhotoFiles(photoFiles);
-            console.log("processPhotoFilesが完了しました。"); // 追加
+// Load positions.json then photos.json, then build index
+Promise.all([
+  fetch('positions.json').then(r=>{ if(!r.ok) throw new Error('positions.json not found'); return r.json(); }),
+  fetch('photos.json').then(r=>{ if(!r.ok) throw new Error('photos.json not found'); return r.json(); })
+]).then(([posData, photoNames])=>{
+  positions = posData || {};
+  photosList = Array.isArray(photoNames) ? photoNames : [];
+  buildImageIndex();
+  // render map markers once map image is loaded (so container size known)
+  if(mapImage.complete){
+    renderAllMarkers();
+    renderModalMarkers();
+  } else {
+    mapImage.onload = ()=> { renderAllMarkers(); renderModalMarkers(); };
+  }
+}).catch(err=>{
+  console.error('読み込みエラー:', err);
+  alert('positions.json または photos.json の読み込みに失敗しました。コンソールを確認してください。');
+});
 
-            renderMarkers();
-            console.log("renderMarkersが完了しました。"); // 追加
-
-        } catch (error) {
-            // ...
-            console.error("データの読み込み中にエラーが発生しました:", error);
-        }
+function buildImageIndex(){
+  imagesByAA = {};
+  for(const name of photosList){
+    const m = String(name).match(regex);
+    if(!m) continue;
+    const [_, YYYY, MM, DD, AAraw, DIRraw, SEQ] = m;
+    const AA = String(AAraw).padStart(2,'0'); // ensure 2 digits
+    const DIR = String(DIRraw).toUpperCase();
+    const ymd = `${YYYY}${MM}${DD}`;
+    const short = `${YYYY.slice(-2)}${MM}${DD}`; // YYMMDD
+    const url = `photos/${name}`;
+    const entry = { name, url, date:ymd, dateShort:short, seq: SEQ || null, dir:DIR, aa:AA };
+    if(!imagesByAA[AA]) imagesByAA[AA] = {};
+    if(!imagesByAA[AA][DIR]) imagesByAA[AA][DIR] = [];
+    imagesByAA[AA][DIR].push(entry);
+  }
+  // sort entries per AA/DIR by date desc then seq
+  for(const aa in imagesByAA){
+    for(const dir in imagesByAA[aa]){
+      imagesByAA[aa][dir].sort((a,b)=>{
+        if(a.date !== b.date) return b.date.localeCompare(a.date);
+        return (b.seq||'') . localeCompare(a.seq||'');
+      });
     }
+  }
+}
 
-        /**
-         * 写真ファイル名を解析し、地点(AA)と方向(X)で構造化
-         * ファイル名: YYYYMMDD_AA-X(-BB).jpg
-         */
-        function processPhotoFiles(files) {
-            const regex = /^(\d{8})_(\d{2})-([NESW]{1,2})(?:-(\d{2}))?\.jpg$/;
-            photosByLocationAndDirection = {};
+// Render markers on main map
+function renderAllMarkers(){
+  // clear existing
+  for(const k in markerElems){ const el = markerElems[k]; if(el && el.parentNode) el.parentNode.removeChild(el); }
+  markerElems = {};
 
-            files.forEach(filename => {
-                const match = filename.match(regex);
-                if (match) {
-                    const [_, yyyymmdd, aa, x, bb] = match;
-                    
-                    if (!photosByLocationAndDirection[aa]) {
-                        photosByLocationAndDirection[aa] = {};
-                    }
-                    if (!photosByLocationAndDirection[aa][x]) {
-                        photosByLocationAndDirection[aa][x] = [];
-                    }
-                    
-                    photosByLocationAndDirection[aa][x].push({
-                        filename: filename,
-                        yyyymmdd: yyyymmdd,
-                        aa: aa,
-                        x: x,
-                        bb: bb // シーケンシャル番号
-                    });
-                }
-            });
+  for(const AA of Object.keys(positions)){
+    const pos = positions[AA];
+    if(!pos) continue;
+    const x = toNum(pos.xPct);
+    const y = toNum(pos.yPct);
+    if(x === null || y === null) { console.warn('invalid pos', AA, pos); continue; }
 
-            // YYYYMMDDでソート
-            for (const aa in photosByLocationAndDirection) {
-                for (const x in photosByLocationAndDirection[aa]) {
-                    photosByLocationAndDirection[aa][x].sort((a, b) => a.yyyymmdd.localeCompare(b.yyyymmdd));
-                }
-            }
-        }
+    const el = document.createElement('div');
+    el.className = 'marker';
+    el.style.left = x + '%';
+    el.style.top = y + '%';
+    el.dataset.aa = AA;
+    el.innerHTML = `<div class="aa">${AA}</div>`;
+    // hover: show popover with direction choices
+    el.addEventListener('mouseenter', (e)=> {
+      showDirPopover(AA, el);
+    });
+    el.addEventListener('mouseleave', (e)=> {
+      // hide popover after small delay only if not hovered over popover
+      setTimeout(()=>{ if(!dirPopover.matches(':hover')) hideDirPopover(); }, 150);
+    });
+    // click: also show popover (toggle)
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      showDirPopover(AA, el);
+    });
+    mapContainer.appendChild(el);
+    markerElems[AA] = el;
+  }
+  // global click hides popover and thumbs
+  document.addEventListener('click', ()=>{ hideDirPopover(); removeThumbOverlay(); });
+}
 
-        /**
-         * 地図上に撮影地点マーカー(AA)を表示
-         */
-     function renderMarkers() {
-        console.log("renderMarkers関数が実行されました。"); // 追加
-        const mapContainer = document.getElementById('map-container');
-        if (!mapContainer) {
-            console.error("map-container要素が見つかりません！"); // 追加
-            return;
-        }
+// Popover: show X buttons for the AA
+let currentPopoverAA = null;
+function showDirPopover(AA, markerEl){
+  currentPopoverAA = AA;
+  // build buttons
+  dirBtnsContainer.innerHTML = '';
+  for(const d of directionsList){
+    const btn = document.createElement('button');
+    btn.textContent = d;
+    // enabled only if images exist
+    const has = imagesByAA[AA] && imagesByAA[AA][d] && imagesByAA[AA][d].length > 0;
+    if(!has){ btn.disabled = true; btn.style.opacity = 0.45; }
+    btn.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      // show thumbnails near marker
+      showThumbnailsAtMarker(AA, d, markerEl);
+      hideDirPopover();
+    });
+    dirBtnsContainer.appendChild(btn);
+  }
+  // position popover near marker
+  const rectMap = mapContainer.getBoundingClientRect();
+  const rectMarker = markerEl.getBoundingClientRect();
+  const left = rectMarker.left - rectMap.left + rectMarker.width/2;
+  const top = rectMarker.top - rectMap.top - 8; // above marker
+  dirPopover.style.left = left + 'px';
+  dirPopover.style.top = Math.max(6, top) + 'px';
+  dirPopover.style.display = 'block';
+  dirPopover.setAttribute('aria-hidden', 'false');
 
-        if (Object.keys(positions).length === 0) {
-             console.warn("positionsデータが空のため、マーカーは表示されません。");
-             return;
-        }
-        for (const aa in positions) {
-            const pos = positions[aa];
+  // keep popover visible when hovered
+  dirPopover.onmouseleave = ()=> { hideDirPopover(); };
+  dirPopover.onmouseenter = ()=> { /* keep visible */ };
+}
 
-            const marker = document.createElement('div');
-            marker.classList.add('marker');
-            marker.textContent = aa;
-            marker.style.left = `${pos.xPct * MAP_WIDTH / 100}px`;
-            marker.style.top = `${pos.yPct * MAP_HEIGHT / 100}px`;
-            marker.dataset.aa = aa;
+function hideDirPopover(){
+  dirPopover.style.display = 'none';
+  dirPopover.setAttribute('aria-hidden','true');
+  currentPopoverAA = null;
+}
 
-            marker.addEventListener('click', () => showDirectionDialog(aa));
+// Thumbnail overlay management
+let currentThumbOverlay = null;
+function removeThumbOverlay(){
+  if(currentThumbOverlay && currentThumbOverlay.parentNode) currentThumbOverlay.parentNode.removeChild(currentThumbOverlay);
+  currentThumbOverlay = null;
+}
 
-            mapContainer.appendChild(marker);
-            console.log(`マーカー追加: ${aa} at (${marker.style.left}, ${marker.style.top})`); // 追加
-        }
+function showThumbnailsAtMarker(AA, DIR, markerEl){
+  removeThumbOverlay();
+  const list = (imagesByAA[AA] && imagesByAA[AA][DIR]) || [];
+  if(!list || list.length === 0){
+    alert('該当する写真がありません。');
+    return;
+  }
+  const overlay = document.createElement('div');
+  overlay.className = 'thumbOverlay';
+  // show below marker
+  const left = markerEl.style.left || '50%';
+  const top = markerEl.style.top || '50%';
+  overlay.style.left = left;
+  overlay.style.top = top;
+
+  const row = document.createElement('div');
+  row.className = 'thumbRow';
+  for(const item of list){
+    const box = document.createElement('div');
+    box.className = 'thumbBox';
+    const img = document.createElement('img');
+    img.src = item.url;
+    img.alt = item.name;
+    img.loading = 'lazy';
+    const lbl = document.createElement('div');
+    lbl.className = 'thumbLabel';
+    lbl.textContent = `${item.dateShort}${ item.seq ? ' ('+item.seq+')' : '' }`;
+    box.appendChild(img);
+    box.appendChild(lbl);
+    // click: open modal showing map + photo; modal should allow interacting with map numbers
+    box.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      openModalFor(AA, DIR, item);
+    });
+    row.appendChild(box);
+  }
+  overlay.appendChild(row);
+  mapContainer.appendChild(overlay);
+  currentThumbOverlay = overlay;
+}
+
+// Modal: show map (with markers) on left, photo on right, and thumbnails below
+function openModalFor(AA, DIR, selectedItem){
+  // show modal
+  modal.classList.add('open');
+  modal.style.display = 'flex';
+  // set photo
+  modalPhoto.src = selectedItem.url;
+  modalMeta.textContent = `ファイル: ${selectedItem.name}　撮影日(YYMMDD): ${selectedItem.dateShort}　地点: ${AA}　方向: ${DIR}`;
+  // render modal thumbs for the same AA/DIR (all items)
+  renderModalThumbs(AA, DIR, selectedItem.name);
+  // render modal map markers (ensure created)
+  // position modal markers same as main map but within modalLeft
+  renderModalMarkers(); // ensures markers exist
+  // highlight the AA in modal
+  highlightModalMarker(AA);
+  // clicking modalMap markers will switch shown thumbnails/photo
+}
+
+// Render markers in modal map (reuse positions)
+function renderModalMarkers(){
+  // remove existing modal markers
+  const existing = modalMap.parentNode.querySelectorAll('.modalMarker');
+  existing.forEach(e=>e.remove());
+  modalMarkerElems = {};
+  const modalLeft = modalMap.parentNode;
+  // modalMap may be scaled; position markers using percentage similarly with absolute positioning inside modalLeft
+  for(const AA of Object.keys(positions)){
+    const pos = positions[AA];
+    if(!pos) continue;
+    const x = toNum(pos.xPct);
+    const y = toNum(pos.yPct);
+    if(x === null || y === null) continue;
+    const m = document.createElement('div');
+    m.className = 'marker modalMarker';
+    m.style.left = x + '%';
+    m.style.top = y + '%';
+    m.style.width = '28px';
+    m.style.height = '28px';
+    m.style.transform = 'translate(-50%,-100%)';
+    m.dataset.aa = AA;
+    m.innerHTML = `<div class="aa">${AA}</div>`;
+    // click on modal marker: show that AA's first available direction thumbnails in modalThumbs
+    m.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const aa = m.dataset.aa;
+      // find a direction that has images; choose first direction with images
+      const dirs = imagesByAA[aa] ? Object.keys(imagesByAA[aa]) : [];
+      if(dirs.length === 0){
+        alert('該当写真なし: ' + aa); return;
+      }
+      const pickDir = dirs[0];
+      // set modal thumbs to that AA/pickDir, and set main photo to first item
+      const first = imagesByAA[aa][pickDir][0];
+      modalPhoto.src = first.url;
+      modalMeta.textContent = `ファイル: ${first.name}　撮影日(YYMMDD): ${first.dateShort}　地点: ${aa}　方向: ${pickDir}`;
+      renderModalThumbs(aa, pickDir, first.name);
+      highlightModalMarker(aa);
+    });
+    modalLeft.appendChild(m);
+    modalMarkerElems[AA] = m;
+  }
+}
+
+// Helper: highlight modal marker visually
+function highlightModalMarker(AA){
+  for(const k in modalMarkerElems){
+    const el = modalMarkerElems[k];
+    if(k === AA){
+      el.style.borderColor = '#ff3b30';
+      el.style.boxShadow = '0 6px 18px rgba(255,59,48,0.25)';
+      el.style.transform = 'translate(-50%,-120%) scale(1.05)';
+    } else {
+      el.style.borderColor = '#444';
+      el.style.boxShadow = '0 4px 10px rgba(0,0,0,0.15)';
+      el.style.transform = 'translate(-50%,-100%) scale(1)';
     }
-        /**
-         * 地点(AA)に所属する方向(X)の選択ダイアログを表示
-         */
-        function showDirectionDialog(aa) {
-            const dialogContainer = document.getElementById('dialog-container');
-            const currentAASpan = document.getElementById('current-aa');
-            const directionButtonsDiv = document.getElementById('direction-buttons');
-            const thumbnailsContainer = document.getElementById('thumbnails-container');
+  }
+}
 
-            currentAASpan.textContent = aa;
-            directionButtonsDiv.innerHTML = ''; // ボタンをクリア
-            thumbnailsContainer.innerHTML = ''; // サムネイルをクリア
-            
-            const availableDirections = photosByLocationAndDirection[aa] ? Object.keys(photosByLocationAndDirection[aa]) : [];
+// Render modal thumbs for AA/DIR; selectedName to mark selected thumb
+function renderModalThumbs(AA, DIR, selectedName){
+  modalThumbs.innerHTML = '';
+  const list = imagesByAA[AA] && imagesByAA[AA][DIR] ? imagesByAA[AA][DIR] : [];
+  for(const item of list){
+    const img = document.createElement('img');
+    img.src = item.url;
+    img.title = `${item.dateShort} ${item.name}`;
+    if(item.name === selectedName) img.style.borderColor = '#0078ff';
+    img.addEventListener('click', ()=>{
+      modalPhoto.src = item.url;
+      modalMeta.textContent = `ファイル: ${item.name}　撮影日(YYMMDD): ${item.dateShort}　地点: ${AA}　方向: ${DIR}`;
+      // highlight clicked thumb border
+      Array.from(modalThumbs.children).forEach(c=>c.style.borderColor = 'transparent');
+      img.style.borderColor = '#0078ff';
+    });
+    modalThumbs.appendChild(img);
+  }
+}
 
-            // 8方位の順でボタンを作成
-            DIRECTIONS.forEach(direction => {
-                if (availableDirections.includes(direction)) {
-                    const button = document.createElement('button');
-                    button.classList.add('direction-button');
-                    button.textContent = direction;
-                    button.dataset.aa = aa;
-                    button.dataset.direction = direction;
-                    button.addEventListener('click', () => showThumbnails(aa, direction));
-                    directionButtonsDiv.appendChild(button);
-                }
-            });
+// close modal
+modalClose.addEventListener('click', ()=>{ modal.classList.remove('open'); modal.style.display='none'; });
+modal.addEventListener('click', (e)=>{ if(e.target === modal) { modal.classList.remove('open'); modal.style.display='none'; } });
 
-            dialogContainer.style.display = 'block';
-        }
+// clicking main map marker or elsewhere shouldn't propagate to document click that hides popover/thumbs
+mapContainer.addEventListener('click', (e)=>{ e.stopPropagation(); });
 
-        /**
-         * 地点(AA)と方向(X)に対応する写真のサムネイルを表示
-         */
-        function showThumbnails(aa, x) {
-            const thumbnailsContainer = document.getElementById('thumbnails-container');
-            thumbnailsContainer.innerHTML = ''; // サムネイルをクリア
+// Utility: parse float tolerant (used in modal render)
+function toNum(v){ const n = parseFloat(v); return isNaN(n) ? null : n; }
 
-            const photos = photosByLocationAndDirection[aa] && photosByLocationAndDirection[aa][x] ? photosByLocationAndDirection[aa][x] : [];
-
-            if (photos.length === 0) {
-                thumbnailsContainer.textContent = "この方向には写真がありません。";
-                return;
-            }
-
-            photos.forEach(photo => {
-                const item = document.createElement('div');
-                item.classList.add('thumbnail-item');
-                item.dataset.filename = photo.filename;
-                item.dataset.aa = photo.aa;
-                
-                // サムネイル画像（ここではファイルそのものを表示）
-                const img = document.createElement('img');
-                img.src = `photos/${photo.filename}`; // photosフォルダからのパス
-                img.alt = photo.filename;
-
-                // 撮影日
-                const dateSpan = document.createElement('span');
-                dateSpan.textContent = photo.yyyymmdd;
-                
-                item.appendChild(img);
-                item.appendChild(dateSpan);
-                
-                item.addEventListener('click', () => showModal(photo.filename, photo.aa));
-                
-                thumbnailsContainer.appendChild(item);
-            });
-        }
-
-        /**
-         * モーダルウィンドウで写真と地図を表示
-         */
-        function showModal(filename, aa) {
-            const modal = document.getElementById('photo-modal');
-            const photoImg = document.getElementById('modal-photo-img');
-            const filenameSpan = document.getElementById('modal-photo-filename');
-            const mapMarker = document.getElementById('modal-map-marker');
-
-            // 写真の表示
-            photoImg.src = `photos/${filename}`;
-            filenameSpan.textContent = filename;
-
-            // 地図上のマーカー表示
-            const pos = positions[aa];
-            if (pos) {
-                // modal-map-containerは幅が100%になるため、パーセントで計算
-                mapMarker.style.left = `${pos.xPct}%`;
-                mapMarker.style.top = `${pos.yPct}%`;
-                mapMarker.textContent = aa;
-                mapMarker.style.display = 'block';
-                mapMarker.dataset.aa = aa;
-            } else {
-                mapMarker.style.display = 'none';
-            }
-            
-            // 地図上のマーカーにクリックイベントを追加（再度方向選択ダイアログを開く機能）
-            mapMarker.onclick = () => {
-                closeModal();
-                showDirectionDialog(aa);
-                // 選択したサムネイルの位置までスクロール（任意）
-                document.getElementById('dialog-container').scrollIntoView({ behavior: 'smooth' });
-            };
-
-            modal.style.display = 'block';
-        }
-
-        /**
-         * モーダルウィンドウを閉じる
-         */
-        function closeModal() {
-            document.getElementById('photo-modal').style.display = 'none';
-        }
-
-        // ページロード時にデータ読み込みを開始
-        window.onload = loadData;
-
-    </script>
+</script>
 </body>
 </html>
