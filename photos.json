@@ -615,14 +615,14 @@
 "full": "photos/19770603_03-NW.jpg"
 },
 {
-"file": "19770603_04-E.jpg",
-"thumb": "thumbs/19770603_04-E.jpg",
-"full": "photos/19770603_04-E.jpg"
-},
-{
 "file": "19770603_05-NE.jpg",
 "thumb": "thumbs/19770603_05-NE.jpg",
 "full": "photos/19770603_05-NE.jpg"
+},
+{
+"file": "19770603_04-NE.jpg",
+"thumb": "thumbs/19770603_04-NE.jpg",
+"full": "photos/19770603_04-NE.jpg"
 },
 {
 "file": "19770603_04-NW-trim.jpg",
