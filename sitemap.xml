@@ -5,8 +5,6 @@
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 <!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
-
-
 <url>
   <loc>https://hnishioji.github.io/photo-map-site/</loc>
   <lastmod>2025-10-14T08:22:13+00:00</lastmod>
@@ -27,6 +25,4 @@
   <lastmod>2025-10-14T08:22:13+00:00</lastmod>
   <priority>0.64</priority>
 </url>
-
-
 </urlset>
