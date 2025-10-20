@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>19780104</title>
+<style>
+body {
+  font-family: sans-serif;
+  text-align: center;
+  margin: 40px;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  justify-items: center;
+}
+.gallery img {
+  width: 300px;
+  height: auto;
+}
+.nav {
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+}
+.nav a {
+  text-decoration: none;
+  color: #0066cc;
+  font-weight: bold;
+}
+body {
+  font-family: sans-serif;
+  text-align: center;
+  margin: 0;
+  background-color: #fff;
+}
+
+/* 縮小表示 */
+h1 {
+  margin: 1vh 0;
+  font-size: 2.5vh;
+}
+
+/* 画像ギャラリー領域 */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);  /* 横4枚 */
+  grid-template-rows: repeat(5, 1fr);     /* 縦5枚 */
+  width: 100vw;
+  height: 80vh;        /* 画面の80%を画像領域にする */
+  gap: 0.5vh;
+  box-sizing: border-box;
+  justify-items: center;
+  align-items: center;
+  margin: 0 auto;
+}
+
+/* 各画像の見せ方 */
+.gallery img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;   /* 縦横比を維持して収める */
+  background-color: #eee; /* 余白部分をグレーに */
+}
+
+/* ナビゲーションリンク */
+.nav {
+  margin-top: 1vh;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 5vw;
+  font-size: 2vh;
+}
+.nav a {
+  text-decoration: none;
+  color: #0066cc;
+  font-weight: bold;
+}
+
+
+
+</style>
+</head>
+<body>
+  <h1>19780104</h1>
+
+  <div class="nav">
+    <a href="19771228.html">← 19771228</a>
+    <a href="19780404.html">19780404 →</a>
+  </div>
+
+  <div class="gallery">
+    <img src="../thumbs/19780104_01-N.jpg" alt="">
+    <img src="../thumbs/19780104_01-W.jpg" alt="">
+    <img src="../thumbs/19780104_02-E.jpg" alt="">
+    <img src="../thumbs/19780104_05-E.jpg" alt="">
+    <img src="../thumbs/19780104_11-W.jpg" alt="">
+    <img src="../thumbs/19780104_12-E.jpg" alt="">
+    <img src="../thumbs/19780104_15-W.jpg" alt="">
+    <img src="../thumbs/19780104_21-NW.jpg" alt="">
+    <img src="../thumbs/19780104_22-NE-.jpg" alt="">
+    <img src="../thumbs/19780104_22-W.jpg" alt="">
+    <img src="../thumbs/19780104_22-NE.jpg" alt="">
+    <img src="../thumbs/19780104_31-SE.jpg" alt="">
+    <img src="../thumbs/19780104_32-S.jpg" alt="">
+    <img src="../thumbs/19780104_32-SW.jpg" alt="">
+    <img src="../thumbs/19780104_35-SE.jpg" alt="">
+    <img src="../thumbs/19780104_35-SW.jpg" alt="">
+    <img src="../thumbs/19780104_36-W.jpg" alt="">
+    <img src="../thumbs/19780104_39-NW.jpg" alt="">
+    <!-- 空白2マス -->
+    <div></div>
+    <div></div>
+  </div>
+</body>
+</html>
