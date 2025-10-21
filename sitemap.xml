@@ -1,26 +1,217 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
 
-<!--  created with free sitemap generation system www.sitemapxml.jp  --> 
+
 <url>
   <loc>https://hnishioji.github.io/photo-map-site/</loc>
-  <priority>1.0</priority>
-  <lastmod>2025-10-16T12:23:13+09:00</lastmod>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770313.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.80</priority>
 </url>
 <url>
   <loc>https://hnishioji.github.io/photo-map-site/about.html</loc>
-  <priority>0.8</priority>
-  <lastmod>2025-10-16T12:23:13+09:00</lastmod>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.80</priority>
 </url>
 <url>
   <loc>https://hnishioji.github.io/photo-map-site/timeline.html</loc>
-  <priority>0.8</priority>
-  <lastmod>2025-10-16T12:23:13+09:00</lastmod>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.80</priority>
 </url>
 <url>
   <loc>https://hnishioji.github.io/photo-map-site/index.html</loc>
-  <priority>0.7</priority>
-  <lastmod>2025-10-16T12:23:13+09:00</lastmod>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770507.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770531.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770603.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770607.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.33</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770614.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.26</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770622.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.21</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770624.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.17</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770628.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.13</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770705.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.11</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770714.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.09</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770720.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.07</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770726.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.05</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770802.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.04</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770809.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.04</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770816.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.03</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770906.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.02</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770910.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.02</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770913.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.01</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770920.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.01</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19770927.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.01</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19771006.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.01</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19771011.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.01</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19771018.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19771025.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19771028.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19771101.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19771108.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19771122.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19771129.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19771206.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19771220.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19771228.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19780104.html</loc>
+  <lastmod>2025-10-21T12:34:43+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19780404.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/19790404.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+<url>
+  <loc>https://hnishioji.github.io/photo-map-site/days/20240502.html</loc>
+  <lastmod>2025-10-21T12:34:42+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+
 
 </urlset>
