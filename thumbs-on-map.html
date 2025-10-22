@@ -1,251 +1,162 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>鶴川駅 工事記録 写真マップ</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Photo Map</title>
 <style>
-body {
-  font-family: sans-serif;
-  margin: 0;
-  background: #f0f0f0;
-  text-align: center;
-}
-#nav {
-  margin: 10px 0;
-}
-#mapWrap {
-  position: relative;
-  display: inline-block;
-  background: #ccc;
-  max-width: 95%;
-}
-#mapImg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-.thumbPin {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 0 3px #333;
-}
-.thumbPin img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-#modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.8);
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-#modal img {
-  max-width: 90%;
-  max-height: 80%;
-}
-#modal span {
-  color: white;
-  display: block;
-  margin-top: 10px;
-}
-#modalClose {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  font-size: 28px;
-  color: white;
-  cursor: pointer;
-}
+  body {
+    font-family: sans-serif;
+    margin: 0;
+    background: #fafafa;
+  }
+  #navBar {
+    background: #eee;
+    padding: 8px;
+    text-align: center;
+  }
+  #mapWrap {
+    position: relative;
+    display: inline-block;
+  }
+  #mapImg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .thumbPin {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    border: 2px solid red; /* デバッグ用 */
+    border-radius: 4px;
+  }
 </style>
 </head>
+
 <body>
-<div id="nav">
-  <button id="prevBtn">← 前の日付</button>
-  <a href="index.html">indexに戻る</a>
-  <button id="nextBtn">次の日付 →</button>
-  <div id="dateLabel" style="margin-top:4px; font-weight:bold;"></div>
-</div>
-
-<div id="mapWrap">
-  <img id="mapImg" src="map.png" alt="鶴川駅工事マップ">
-</div>
-
-<div id="modal">
-  <div id="modalClose">×</div>
-  <div>
-    <img id="modalImg" src="">
-    <span id="modalCaption"></span>
+  <div id="navBar">
+    <button id="prevBtn">←前の日付</button>
+    <button id="indexBtn" onclick="location.href='index.html'">indexに戻る</button>
+    <button id="nextBtn">→次の日付</button>
   </div>
-</div>
+
+  <div id="mapWrap">
+    <img id="mapImg" src="map.png" alt="map" />
+  </div>
 
 <script>
-let photosByDate = {};
-let dates = [];
-let idx = 0;
 let positions = {};
+let photos = [];
+let currentDateIndex = 0;
 
-// 初期化
-async function init() {
-  try {
-    const [photosRes, posRes] = await Promise.all([
-      fetch('photos.json'),
-      fetch('positions.json')
-    ]);
-    const photos = await photosRes.json();
-    positions = await posRes.json();
-
-    // 日付ごとにグループ化
-    photos.forEach(p => {
-      const m = p.file.match(/^(\d{8})/);
-      if (!m) return;
-      const date = m[1];
-      if (!photosByDate[date]) photosByDate[date] = [];
-      photosByDate[date].push(p);
-    });
-
-    dates = Object.keys(photosByDate).sort();
-    renderDate(0);
-  } catch (e) {
-    console.error(e);
-  }
+// --- JSONの読み込み ---
+async function loadData() {
+  positions = await fetch('positions.json').then(r => r.json());
+  photos = await fetch('photos.json').then(r => r.json());
+  init();
 }
 
-// 指定日を表示
-function renderDate(index) {
-  if (index < 0) index = 0;
-  if (index >= dates.length) index = dates.length - 1;
-  idx = index;
+// --- 初期化 ---
+function init() {
+  // 撮影日一覧を抽出してソート
+  const dates = [...new Set(photos.map(p => p.file.substring(0, 8)))].sort();
+  currentDateIndex = 0;
 
-  const dateKey = dates[idx];
-  const list = photosByDate[dateKey];
-  const dateLabel = document.getElementById('dateLabel');
-  dateLabel.textContent = prettyDate(dateKey) + ` （${list.length}枚）`;
+  renderDate(dates[currentDateIndex]);
 
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  prevBtn.disabled = (idx === 0);
-  nextBtn.disabled = (idx === dates.length - 1);
+  document.getElementById('prevBtn').onclick = () => {
+    if (currentDateIndex > 0) renderDate(dates[--currentDateIndex]);
+  };
+  document.getElementById('nextBtn').onclick = () => {
+    if (currentDateIndex < dates.length - 1) renderDate(dates[++currentDateIndex]);
+  };
+}
+
+// --- 指定日の画像を表示 ---
+function renderDate(dateStr) {
+  console.log("renderDate:", dateStr);
 
   const mapWrap = document.getElementById('mapWrap');
-  mapWrap.querySelectorAll('.thumbPin').forEach(n => n.remove());
+  const mapImg = document.getElementById('mapImg');
 
-  // 同地点の枚数をカウント
-  const counts = {};
-  list.forEach(it => {
-    const m = it.file.match(/^\d{8}-(\d{2})/);
-    const pt = m ? m[1] : '__no__';
-    counts[pt] = (counts[pt] || 0) + 1;
+  // 既存のthumbを削除
+  document.querySelectorAll('.thumbPin').forEach(el => el.remove());
+
+  const dailyPhotos = photos.filter(p => p.file.startsWith(dateStr));
+
+  dailyPhotos.forEach((photo, i) => {
+    const match = photo.file.match(/_(\d{2})-/);
+    if (!match) return;
+    const point = match[1];
+
+    const pos = positions[point];
+    if (!pos) return;
+
+    const thumb = document.createElement('img');
+    thumb.src = photo.thumb;
+    thumb.className = 'thumbPin';
+    thumb.dataset.xPct = pos.xPct;
+    thumb.dataset.yPct = pos.yPct;
+    // 円形ずらし用
+    thumb.dataset.angle = (i / dailyPhotos.length) * Math.PI * 2;
+    thumb.dataset.radius = 20;
+
+    thumb.onclick = () => {
+      const full = document.createElement('img');
+      full.src = photo.full;
+      full.style.maxWidth = '90vw';
+      full.style.maxHeight = '90vh';
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position:fixed;top:0;left:0;width:100%;height:100%;
+        background:rgba(0,0,0,0.8);display:flex;
+        align-items:center;justify-content:center;z-index:9999;
+      `;
+      overlay.appendChild(full);
+      overlay.onclick = () => overlay.remove();
+      document.body.appendChild(overlay);
+    };
+
+    mapWrap.appendChild(thumb);
   });
 
-  const usedIndex = {};
+  // --- mapImgのロード後に確実に配置 ---
+  const safePosition = () => {
+    console.debug("画像サイズ:", mapImg.clientWidth, mapImg.clientHeight);
+    positionThumbs();
+  };
 
-  list.forEach(it => {
-    const base = it.file;
-    const m = base.match(/^\d{8}-(\d{2})/);
-    const pt = m ? m[1] : '__no__';
-    const pos = positions[pt];
-    const xPct = pos ? Number(pos.xPct) : 50;
-    const yPct = pos ? Number(pos.yPct) : 50;
-
-    usedIndex[pt] = (usedIndex[pt] || 0) + 1;
-    const order = usedIndex[pt] - 1;
-    const radius = Math.min(6 + order * 10, 40);
-    const angle = (order * 47) * Math.PI / 180;
-
-    const div = document.createElement('div');
-    div.className = 'thumbPin';
-    div.dataset.xPct = xPct;
-    div.dataset.yPct = yPct;
-    div.dataset.radius = radius;
-    div.dataset.angle = angle;
-
-    const img = document.createElement('img');
-    img.src = it.thumb;
-    img.alt = base;
-    div.appendChild(img);
-
-    div.dataset.full = it.full;
-    div.dataset.basename = base;
-    div.addEventListener('click', () => openModal(it.full, base));
-
-    mapWrap.appendChild(div);
-  });
-
-  const imgEl = document.getElementById('mapImg');
-  function safePosition() {
-    requestAnimationFrame(() => positionThumbs());
-    setTimeout(positionThumbs, 1000);
-  }
-
-  if (imgEl.complete && imgEl.naturalWidth !== 0) {
+  if (mapImg.complete && mapImg.naturalWidth > 0) {
     safePosition();
   } else {
-    imgEl.addEventListener('load', () => {
-      console.debug('mapImg loaded, positioning thumbs...');
-      safePosition();
-    }, { once: true });
+    mapImg.addEventListener('load', safePosition, { once: true });
   }
 }
 
-// サムネイル配置
+// --- サムネイルを配置 ---
 function positionThumbs() {
   const mapImg = document.getElementById('mapImg');
-  const mapWrap = document.getElementById('mapWrap');
   const imgWidth = mapImg.clientWidth;
   const imgHeight = mapImg.clientHeight;
 
-  console.debug("画像サイズ:", imgWidth, imgHeight);
+  console.debug("positionThumbs:", imgWidth, imgHeight);
 
   document.querySelectorAll('.thumbPin').forEach(pin => {
     const xPct = parseFloat(pin.dataset.xPct) || 50;
     const yPct = parseFloat(pin.dataset.yPct) || 50;
-    const radius = parseFloat(pin.dataset.radius) || 0;
-    const angle = parseFloat(pin.dataset.angle) || 0;
+    const r = parseFloat(pin.dataset.radius) || 0;
+    const a = parseFloat(pin.dataset.angle) || 0;
 
-    // 基準点（positions.json の％座標）
-    const px = imgWidth * xPct / 100;
-    const py = imgHeight * yPct / 100;
+    const x = imgWidth * xPct / 100 + Math.cos(a) * r;
+    const y = imgHeight * yPct / 100 + Math.sin(a) * r;
 
-    // 同地点のサムネイルを少しずらして円形配置
-    const dx = Math.cos(angle) * radius;
-    const dy = Math.sin(angle) * radius;
-
-    // --- 相対位置配置 ---
-    pin.style.left = `${px + dx}px`;
-    pin.style.top = `${py + dy}px`;
+    pin.style.left = `${x}px`;
+    pin.style.top = `${y}px`;
   });
 }
 
-// モーダル開く
-function openModal(src, caption) {
-  const modal = document.getElementById('modal');
-  document.getElementById('modalImg').src = src;
-  document.getElementById('modalCaption').textContent = caption;
-  modal.style.display = 'flex';
-}
-
-// モーダル閉じる
-document.getElementById('modalClose').addEventListener('click', () => {
-  document.getElementById('modal').style.display = 'none';
-});
-
-// 日付ナビ
-document.getElementById('prevBtn').addEventListener('click', () => renderDate(idx - 1));
-document.getElementById('nextBtn').addEventListener('click', () => renderDate(idx + 1));
-
-function prettyDate(yyyymmdd) {
-  return yyyymmdd.replace(/(\d{4})(\d{2})(\d{2})/, '$1年$2月$3日');
-}
-
-window.addEventListener('resize', positionThumbs);
-window.addEventListener('DOMContentLoaded', init);
+loadData();
 </script>
 </body>
 </html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鶴川駅 工事記録 写真マップ</title>
+<style>
+body {
+  font-family: sans-serif;
+  margin: 0;
+  background: #f0f0f0;
+  text-align: center;
+}
+#nav {
+  margin: 10px 0;
+}
+#mapWrap {
+  position: relative;
+  display: inline-block;
+  background: #ccc;
+  max-width: 95%;
+}
+#mapImg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.thumbPin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 0 3px #333;
+}
+.thumbPin img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+#modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+#modal img {
+  max-width: 90%;
+  max-height: 80%;
+}
+#modal span {
+  color: white;
+  display: block;
+  margin-top: 10px;
+}
+#modalClose {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 28px;
+  color: white;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div id="nav">
+  <button id="prevBtn">← 前の日付</button>
+  <a href="index.html">indexに戻る</a>
+  <button id="nextBtn">次の日付 →</button>
+  <div id="dateLabel" style="margin-top:4px; font-weight:bold;"></div>
+</div>
+
+<div id="mapWrap">
+  <img id="mapImg" src="map.png" alt="鶴川駅工事マップ">
+</div>
+
+<div id="modal">
+  <div id="modalClose">×</div>
+  <div>
+    <img id="modalImg" src="">
+    <span id="modalCaption"></span>
+  </div>
+</div>
+
+<script>
+let photosByDate = {};
+let dates = [];
+let idx = 0;
+let positions = {};
+
+// 初期化
+async function init() {
+  try {
+    const [photosRes, posRes] = await Promise.all([
+      fetch('photos.json'),
+      fetch('positions.json')
+    ]);
+    const photos = await photosRes.json();
+    positions = await posRes.json();
+
+    // 日付ごとにグループ化
+    photos.forEach(p => {
+      const m = p.file.match(/^(\d{8})/);
+      if (!m) return;
+      const date = m[1];
+      if (!photosByDate[date]) photosByDate[date] = [];
+      photosByDate[date].push(p);
+    });
+
+    dates = Object.keys(photosByDate).sort();
+    renderDate(0);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// 指定日を表示
+function renderDate(index) {
+  if (index < 0) index = 0;
+  if (index >= dates.length) index = dates.length - 1;
+  idx = index;
+
+  const dateKey = dates[idx];
+  const list = photosByDate[dateKey];
+  const dateLabel = document.getElementById('dateLabel');
+  dateLabel.textContent = prettyDate(dateKey) + ` （${list.length}枚）`;
+
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  prevBtn.disabled = (idx === 0);
+  nextBtn.disabled = (idx === dates.length - 1);
+
+  const mapWrap = document.getElementById('mapWrap');
+  mapWrap.querySelectorAll('.thumbPin').forEach(n => n.remove());
+
+  // 同地点の枚数をカウント
+  const counts = {};
+  list.forEach(it => {
+    const m = it.file.match(/^\d{8}-(\d{2})/);
+    const pt = m ? m[1] : '__no__';
+    counts[pt] = (counts[pt] || 0) + 1;
+  });
+
+  const usedIndex = {};
+
+  list.forEach(it => {
+    const base = it.file;
+    const m = base.match(/^\d{8}-(\d{2})/);
+    const pt = m ? m[1] : '__no__';
+    const pos = positions[pt];
+    const xPct = pos ? Number(pos.xPct) : 50;
+    const yPct = pos ? Number(pos.yPct) : 50;
+
+    usedIndex[pt] = (usedIndex[pt] || 0) + 1;
+    const order = usedIndex[pt] - 1;
+    const radius = Math.min(6 + order * 10, 40);
+    const angle = (order * 47) * Math.PI / 180;
+
+    const div = document.createElement('div');
+    div.className = 'thumbPin';
+    div.dataset.xPct = xPct;
+    div.dataset.yPct = yPct;
+    div.dataset.radius = radius;
+    div.dataset.angle = angle;
+
+    const img = document.createElement('img');
+    img.src = it.thumb;
+    img.alt = base;
+    div.appendChild(img);
+
+    div.dataset.full = it.full;
+    div.dataset.basename = base;
+    div.addEventListener('click', () => openModal(it.full, base));
+
+    mapWrap.appendChild(div);
+  });
+
+  const imgEl = document.getElementById('mapImg');
+  function safePosition() {
+    requestAnimationFrame(() => positionThumbs());
+    setTimeout(positionThumbs, 1000);
+  }
+
+  if (imgEl.complete && imgEl.naturalWidth !== 0) {
+    safePosition();
+  } else {
+    imgEl.addEventListener('load', () => {
+      console.debug('mapImg loaded, positioning thumbs...');
+      safePosition();
+    }, { once: true });
+  }
+}
+
+// サムネイル配置
+function positionThumbs() {
+  const mapImg = document.getElementById('mapImg');
+  const mapWrap = document.getElementById('mapWrap');
+  const imgWidth = mapImg.clientWidth;
+  const imgHeight = mapImg.clientHeight;
+
+  console.debug("画像サイズ:", imgWidth, imgHeight);
+
+  document.querySelectorAll('.thumbPin').forEach(pin => {
+    const xPct = parseFloat(pin.dataset.xPct) || 50;
+    const yPct = parseFloat(pin.dataset.yPct) || 50;
+    const radius = parseFloat(pin.dataset.radius) || 0;
+    const angle = parseFloat(pin.dataset.angle) || 0;
+
+    // 基準点（positions.json の％座標）
+    const px = imgWidth * xPct / 100;
+    const py = imgHeight * yPct / 100;
+
+    // 同地点のサムネイルを少しずらして円形配置
+    const dx = Math.cos(angle) * radius;
+    const dy = Math.sin(angle) * radius;
+
+    // --- 相対位置配置 ---
+    pin.style.left = `${px + dx}px`;
+    pin.style.top = `${py + dy}px`;
+  });
+}
+
+// モーダル開く
+function openModal(src, caption) {
+  const modal = document.getElementById('modal');
+  document.getElementById('modalImg').src = src;
+  document.getElementById('modalCaption').textContent = caption;
+  modal.style.display = 'flex';
+}
+
+// モーダル閉じる
+document.getElementById('modalClose').addEventListener('click', () => {
+  document.getElementById('modal').style.display = 'none';
+});
+
+// 日付ナビ
+document.getElementById('prevBtn').addEventListener('click', () => renderDate(idx - 1));
+document.getElementById('nextBtn').addEventListener('click', () => renderDate(idx + 1));
+
+function prettyDate(yyyymmdd) {
+  return yyyymmdd.replace(/(\d{4})(\d{2})(\d{2})/, '$1年$2月$3日');
+}
+
+window.addEventListener('resize', positionThumbs);
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
