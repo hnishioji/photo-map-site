@@ -224,8 +224,7 @@
       }, { once: true });
     }
     // --- mapImg のロード確認と配置 ---
-     let imgEl = document.getElementById('mapImg');
-	// const imgEl →　let imgEl に変更　2025/10/22 9:58
+     imgEl = document.getElementById('mapImg');
 
     function safePosition() {
       // 一定時間後にも再試行（画像が描画されるまで）
