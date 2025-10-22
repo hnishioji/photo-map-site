@@ -3,33 +3,70 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Photo Map</title>
+<title>Photo Map Viewer</title>
+
 <style>
   body {
     font-family: sans-serif;
     margin: 0;
     background: #fafafa;
   }
+
   #navBar {
     background: #eee;
     padding: 8px;
     text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
   }
+
+  #dateDisplay {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
   #mapWrap {
     position: relative;
-    display: inline-block;
+    display: block;
+    max-width: 100%;
+    margin: 0 auto;
   }
+
   #mapImg {
     width: 100%;
     height: auto;
     display: block;
   }
+
   .thumbPin {
     position: absolute;
     transform: translate(-50%, -50%);
     cursor: pointer;
-    border: 2px solid red; /* デバッグ用 */
     border-radius: 4px;
+    transition: transform 0.2s;
+  }
+
+  .thumbPin:hover {
+    transform: translate(-50%, -50%) scale(1.3);
+    z-index: 10;
+  }
+
+  #sizeControl {
+    position: fixed;
+    left: 10px;
+    bottom: 10px;
+    background: rgba(255,255,255,0.8);
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
   }
 </style>
 </head>
@@ -43,14 +80,22 @@
 
   <div id="mapWrap">
     <img id="mapImg" src="map.png" alt="map" />
+    <div id="dateDisplay"></div>
+  </div>
+
+  <div id="sizeControl">
+    🔍 サムネイルサイズ:
+    <input type="range" id="thumbSize" min="40" max="200" value="80" />
   </div>
 
 <script>
 let positions = {};
 let photos = [];
 let currentDateIndex = 0;
+let dates = [];
+let thumbSize = 80;
 
-// --- JSONの読み込み ---
+// --- JSONデータのロード ---
 async function loadData() {
   positions = await fetch('positions.json').then(r => r.json());
   photos = await fetch('photos.json').then(r => r.json());
@@ -59,10 +104,8 @@ async function loadData() {
 
 // --- 初期化 ---
 function init() {
-  // 撮影日一覧を抽出してソート
-  const dates = [...new Set(photos.map(p => p.file.substring(0, 8)))].sort();
+  dates = [...new Set(photos.map(p => p.file.substring(0, 8)))].sort();
   currentDateIndex = 0;
-
   renderDate(dates[currentDateIndex]);
 
   document.getElementById('prevBtn').onclick = () => {
@@ -71,16 +114,23 @@ function init() {
   document.getElementById('nextBtn').onclick = () => {
     if (currentDateIndex < dates.length - 1) renderDate(dates[++currentDateIndex]);
   };
+
+  document.getElementById('thumbSize').oninput = (e) => {
+    thumbSize = parseInt(e.target.value);
+    positionThumbs();
+  };
 }
 
-// --- 指定日の画像を表示 ---
+// --- 指定日付の写真を描画 ---
 function renderDate(dateStr) {
   console.log("renderDate:", dateStr);
-
   const mapWrap = document.getElementById('mapWrap');
   const mapImg = document.getElementById('mapImg');
+  const dateDisplay = document.getElementById('dateDisplay');
 
-  // 既存のthumbを削除
+  dateDisplay.textContent = `${dateStr.substring(0,4)}/${dateStr.substring(4,6)}/${dateStr.substring(6,8)}`;
+
+  // 古いthumbを削除
   document.querySelectorAll('.thumbPin').forEach(el => el.remove());
 
   const dailyPhotos = photos.filter(p => p.file.startsWith(dateStr));
@@ -89,7 +139,6 @@ function renderDate(dateStr) {
     const match = photo.file.match(/_(\d{2})-/);
     if (!match) return;
     const point = match[1];
-
     const pos = positions[point];
     if (!pos) return;
 
@@ -98,10 +147,11 @@ function renderDate(dateStr) {
     thumb.className = 'thumbPin';
     thumb.dataset.xPct = pos.xPct;
     thumb.dataset.yPct = pos.yPct;
-    // 円形ずらし用
     thumb.dataset.angle = (i / dailyPhotos.length) * Math.PI * 2;
     thumb.dataset.radius = 20;
+    thumb.style.width = thumb.style.height = thumbSize + "px";
 
+    // 拡大画像表示
     thumb.onclick = () => {
       const full = document.createElement('img');
       full.src = photo.full;
@@ -110,8 +160,8 @@ function renderDate(dateStr) {
       const overlay = document.createElement('div');
       overlay.style.cssText = `
         position:fixed;top:0;left:0;width:100%;height:100%;
-        background:rgba(0,0,0,0.8);display:flex;
-        align-items:center;justify-content:center;z-index:9999;
+        background:rgba(0,0,0,0.8);
+        display:flex;align-items:center;justify-content:center;z-index:9999;
       `;
       overlay.appendChild(full);
       overlay.onclick = () => overlay.remove();
@@ -121,7 +171,7 @@ function renderDate(dateStr) {
     mapWrap.appendChild(thumb);
   });
 
-  // --- mapImgのロード後に確実に配置 ---
+  // mapImg ロード後に配置実行
   const safePosition = () => {
     console.debug("画像サイズ:", mapImg.clientWidth, mapImg.clientHeight);
     positionThumbs();
@@ -143,6 +193,7 @@ function positionThumbs() {
   console.debug("positionThumbs:", imgWidth, imgHeight);
 
   document.querySelectorAll('.thumbPin').forEach(pin => {
+    pin.style.width = pin.style.height = thumbSize + "px";
     const xPct = parseFloat(pin.dataset.xPct) || 50;
     const yPct = parseFloat(pin.dataset.yPct) || 50;
     const r = parseFloat(pin.dataset.radius) || 0;
