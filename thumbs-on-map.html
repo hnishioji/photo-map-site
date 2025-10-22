@@ -223,7 +223,33 @@
         setTimeout(positionThumbs, 10);
       }, { once: true });
     }
-  }
+    // --- mapImg のロード確認と配置 ---
+    const imgEl = document.getElementById('mapImg');
+
+    function safePosition() {
+      // 一定時間後にも再試行（画像が描画されるまで）
+      requestAnimationFrame(() => {
+        positionThumbs();
+      });
+      // 念のためもう一度（1秒後に再配置）
+      setTimeout(positionThumbs, 1000);
+    }
+
+    if (imgEl.complete && imgEl.naturalWidth !== 0) {
+      safePosition(); // 読み込み済みでも確実に実行
+    } else {
+      imgEl.addEventListener(
+        'load',
+        () => {
+          console.debug('mapImg loaded, positioning thumbs...');
+          safePosition();
+        },
+        { once: true }
+      );
+    }
+  
+
+}
 
 
   // position all thumbPin elements based on map image size + stored xPct/yPct + offsets
