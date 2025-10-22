@@ -198,8 +198,10 @@ function renderDate(index) {
 function positionThumbs() {
   const mapImg = document.getElementById('mapImg');
   const mapWrap = document.getElementById('mapWrap');
-  const imgRect = mapImg.getBoundingClientRect();
-  const wrapRect = mapWrap.getBoundingClientRect();
+  const imgWidth = mapImg.clientWidth;
+  const imgHeight = mapImg.clientHeight;
+
+  console.debug("画像サイズ:", imgWidth, imgHeight);
 
   document.querySelectorAll('.thumbPin').forEach(pin => {
     const xPct = parseFloat(pin.dataset.xPct) || 50;
@@ -207,13 +209,17 @@ function positionThumbs() {
     const radius = parseFloat(pin.dataset.radius) || 0;
     const angle = parseFloat(pin.dataset.angle) || 0;
 
-    const px = imgRect.left + (imgRect.width * xPct / 100);
-    const py = imgRect.top + (imgRect.height * yPct / 100);
+    // 基準点（positions.json の％座標）
+    const px = imgWidth * xPct / 100;
+    const py = imgHeight * yPct / 100;
+
+    // 同地点のサムネイルを少しずらして円形配置
     const dx = Math.cos(angle) * radius;
     const dy = Math.sin(angle) * radius;
 
-    pin.style.left = (px - wrapRect.left + dx) + 'px';
-    pin.style.top = (py - wrapRect.top + dy) + 'px';
+    // --- 相対位置配置 ---
+    pin.style.left = `${px + dx}px`;
+    pin.style.top = `${py + dy}px`;
   });
 }
 
