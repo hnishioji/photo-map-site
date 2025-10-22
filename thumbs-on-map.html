@@ -256,7 +256,7 @@
 
 
  function positionThumbs(){
-    const imgEl = document.getElementById('mapImg');
+    // ここでは再宣言しない。既に上で const imgEl = ... がある場合。
     const imgRect = imgEl.getBoundingClientRect();
     const wrapRect = mapWrap.getBoundingClientRect();
 
