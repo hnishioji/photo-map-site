@@ -224,31 +224,25 @@
       }, { once: true });
     }
     // --- mapImg のロード確認と配置 ---
-     imgEl = document.getElementById('mapImg');
+  // --- mapImg のロード確認と配置 ---
+function safePosition() {
+  requestAnimationFrame(() => {
+    positionThumbs();
+  });
+  setTimeout(positionThumbs, 1000);
+}
 
-    function safePosition() {
-      // 一定時間後にも再試行（画像が描画されるまで）
-      requestAnimationFrame(() => {
-        positionThumbs();
-      });
-      // 念のためもう一度（1秒後に再配置）
-      setTimeout(positionThumbs, 1000);
-    }
-
-    if (imgEl.complete && imgEl.naturalWidth !== 0) {
-      safePosition(); // 読み込み済みでも確実に実行
-    } else {
-      imgEl.addEventListener(
-        'load',
-        () => {
-          console.debug('mapImg loaded, positioning thumbs...');
-          safePosition();
-        },
-        { once: true }
-      );
-    }
-  
-
+if (imgEl.complete && imgEl.naturalWidth !== 0) {
+  safePosition(); // 読み込み済みでも確実に実行
+} else {
+  imgEl.addEventListener(
+    'load',
+    () => {
+      console.debug('mapImg loaded, positioning thumbs...');
+      safePosition();
+    },
+    { once: true }
+  );
 }
 
 
