@@ -1,72 +1,39 @@
-```html
 <!doctype html>
 <html lang="ja">
 <head>
-<!-- Google Analytics (gtag.js) の読み込み -->
-<!-- このサイトへのアクセス状況を計測するためのコード -->
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-2DYWLZQLLW"></script>
 <script>
-  // Google Analytics 用データ領域を初期化
   window.dataLayer = window.dataLayer || [];
-
-  // Analytics イベント送信用関数
   function gtag(){dataLayer.push(arguments);}
-
-  // Analytics の開始時刻を登録
   gtag('js', new Date());
-
-  // 指定した計測IDで Google Analytics を有効化
   gtag('config', 'G-2DYWLZQLLW');
 </script>
-
-<!-- 文字コードを UTF-8 に設定 -->
 <meta charset="utf-8">
-
-<!-- スマホ等で画面幅に合わせて表示する設定 -->
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
-<!-- ブラウザのタイトルバーやタブに表示される名称 -->
 <title>小田急線鶴川駅（待避線が新設された1977年頃の風景）</title>
-
 <style>
-/* ページ全体の基本デザイン設定 */
 body {
   font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
   margin:0; padding:0;
   background:#f7f7f7; color:#222;
 }
-
-/* ヘッダー領域の装飾 */
 header {
   background:#000080; color:#fff;
   padding:20px; text-align:center;
 }
-
-/* タイトル文字サイズ調整 */
 header h1 { margin:0; font-size:24px; }
-
-/* サブタイトルの文字設定 */
 header p { margin:8px 0 0; font-size:14px; color:#ddd; }
-
-/* メインコンテンツ領域の横幅と余白 */
 main {
   max-width:1100px; margin:20px auto; padding:0 10px;
 }
-
-/* 「使い方」説明欄のデザイン */
 #usage {
   background:#fff; border:1px solid #ddd;
   padding:10px 15px; margin-bottom:15px;
   border-radius:6px; font-size:14px;
 }
-
-/* 地図画像を格納する領域 */
 #mapContainer { position:relative; }
-
-/* 地図画像を画面幅に合わせて表示 */
 #mapImage { width:100%; display:block; border:1px solid #aaa; }
-
-/* 地図上の番号マーカーの見た目 */
 .marker {
   position:absolute; transform:translate(-50%,-100%);
   width:32px; height:32px; border-radius:50%;
@@ -74,45 +41,27 @@ main {
   display:flex; align-items:center; justify-content:center;
   font-weight:bold; cursor:pointer;
 }
-
-/* サムネイル一覧を表示する吹き出し領域 */
 .thumbOverlay {
   position:absolute; background:#fff; border:1px solid #ccc;
   padding:6px; display:flex; flex-wrap:wrap; gap:8px;
   border-radius:6px; z-index:50;
 }
-
-/* サムネイル画像＋日付ラベルのボックス */
 .thumbBox { text-align:center; cursor:pointer; font-size:12px; }
-
-/* サムネイル画像のサイズ制限と枠線 */
 .thumbBox img { max-width:120px; border:1px solid #999; display:block; }
-
-/* 拡大写真表示用モーダル画面全体 */
 .modal {
   position:fixed; inset:0; display:none;
   background:rgba(0,0,0,0.6);
   align-items:center; justify-content:center;
   z-index:9999;
 }
-
-/* open クラス追加時のみモーダルを表示 */
 .modal.open { display:flex; }
-
-/* モーダル内部の白い表示領域 */
 .modalInner {
   background:#fff; padding:15px; border-radius:8px;
   max-width:90%; max-height:90%; overflow:auto;
   text-align:center;
 }
-
-/* 拡大画像は画面内に収まるよう調整 */
 .modalInner img { max-width:100%; height:auto; }
-
-/* モーダル下部のファイル名表示領域 */
 #modalMeta { font-size:13px; color:#333; margin-top:8px; }
-
-/* フッター領域の装飾 */
 footer {
   text-align:center; font-size:12px; color:#666;
   padding:15px; margin-top:20px;
@@ -121,13 +70,9 @@ footer {
 </style>
 </head>
 <body>
-
-<!-- ページ上部ヘッダー -->
 <header>
   <h1>小田急線鶴川駅（待避線が新設された1977年頃の風景）</h1>
   <p>オリンパスPEN-EE(白黒ハーフサイズカメラ)による記録</p>
-
-  <!-- 他ページへのナビゲーションリンク -->
   <nav>
     <a href="thumbs-on-map.html" style="color:#fff; margin-left:10px;">撮影日別 地図上 表示</a>
     <a href="days/19770313.html" style="color:#fff; margin-left:10px;">撮影日別 表形式 表示</a>
@@ -136,10 +81,7 @@ footer {
   </nav>
 </header>
 
-<!-- メインコンテンツ領域 -->
 <main>
-
-  <!-- サイトの使い方説明 -->
   <section id="usage">
     <strong>使い方：</strong><br>
     1. 地図上の番号をクリックすると、その地点の写真一覧が表示されます。<br>
@@ -149,151 +91,87 @@ footer {
 　　→「撮影日別(1977/3/13)から」は撮影日ごとの各地点の写真を整理しています。
   </section>
 
-  <!-- 地図画像とマーカーを配置する領域 -->
   <div id="mapContainer">
     <img id="mapImage" src="map.png" alt="小田急線鶴川駅の付近図">
   </div>
 </main>
 
-<!-- 写真拡大表示用モーダル -->
 <div id="modal" class="modal">
   <div class="modalInner">
-
-    <!-- モーダルを閉じるボタン -->
     <button id="modalClose">閉じる</button><br>
-
-    <!-- 拡大表示される写真 -->
     <img id="modalPhoto" src="" alt="">
-
-    <!-- ファイル名などの補足情報表示 -->
     <div id="modalMeta"></div>
   </div>
 </div>
 
-<!-- フッター情報 -->
+
 <footer>
   © 2026 鶴川＠昭和 ｜ 無断転載禁止 ｜ <a href="https://x.com/residence_tsuru" target="_blank">X(Twitter)</a>
 </footer>
 
 <script>
-// HTML 要素を JavaScript から取得
 const mapContainer = document.getElementById('mapContainer');
 const modal = document.getElementById('modal');
 const modalPhoto = document.getElementById('modalPhoto');
 const modalMeta = document.getElementById('modalMeta');
 const modalClose = document.getElementById('modalClose');
 
-// JSONから読み込むデータ格納用変数
 let positions = {};
 let photos = [];
 
-// positions.json と photos.json を同時に読み込む
 Promise.all([
   fetch('positions.json').then(r=>r.json()),
   fetch('photos.json').then(r=>r.json())
 ]).then(([pos, ph])=>{
-
-  // 読み込んだデータを変数へ保存
   positions = pos;
   photos = ph;
-
-  // 地図上にマーカーを生成
   renderMarkers();
-
 }).catch(err=>{
-
-  // JSON読込失敗時のエラー表示
   alert("positions.json または photos.json の読み込みに失敗しました");
   console.error(err);
 });
 
-// 地図上へ地点マーカーを配置する関数
 function renderMarkers(){
-
-  // positions 内の各地点について処理
   Object.keys(positions).forEach(AA=>{
     const pos = positions[AA];
-
-    // マーカー用 div を生成
     const marker = document.createElement('div');
     marker.className = 'marker';
-
-    // マーカー表示文字（地点番号）
     marker.textContent = AA;
-
-    // 地図上の位置を % 指定で配置
     marker.style.left = pos.xPct + "%";
     marker.style.top = pos.yPct + "%";
-
-    // クリック時にサムネイル一覧を表示
     marker.addEventListener('click', ()=>showThumbnails(AA, marker));
-
-    // 地図領域へ追加
     mapContainer.appendChild(marker);
   });
 }
 
-// 指定地点のサムネイル一覧を表示する関数
 function showThumbnails(AA, marker){
-
-  // サムネイル表示領域を生成
   const overlay = document.createElement('div');
   overlay.className = 'thumbOverlay';
-
-  // マーカー位置に合わせて表示
   overlay.style.left = marker.style.left;
   overlay.style.top = marker.style.top;
-
-  // 対象地点に対応する写真のみ抽出
   const list = photos.filter(p => p.file.includes("_" + AA + "-"));
-
-  // 抽出した写真ごとにサムネイル生成
   list.forEach(item=>{
     const box = document.createElement('div');
     box.className = 'thumbBox';
-
-    // サムネイル画像生成
     const img = document.createElement('img');
     img.src = item.thumb;
-
-    // 撮影日ラベル生成
     const lbl = document.createElement('div');
     lbl.textContent = item.file.slice(0,8); // YYYYMMDD
-
-    // ボックスへ画像とラベル追加
     box.appendChild(img);
     box.appendChild(lbl);
-
-    // サムネイルクリックで拡大表示
     box.addEventListener('click', ()=>openModal(item));
-
-    // overlay に追加
     overlay.appendChild(box);
   });
-
-  // 既存サムネイル一覧を削除（複数表示防止）
   document.querySelectorAll('.thumbOverlay').forEach(e=>e.remove());
-
-  // 地図上へサムネイル一覧を追加
   mapContainer.appendChild(overlay);
 }
 
-// 拡大写真モーダルを開く関数
 function openModal(item){
-
-  // 拡大表示画像を設定
   modalPhoto.src = item.full;
-
-  // ファイル名を表示
   modalMeta.textContent = item.file;
-
-  // モーダル表示用クラスを追加
   modal.classList.add('open');
 }
-
-// 「閉じる」ボタン押下時にモーダル非表示
 modalClose.addEventListener('click', ()=>modal.classList.remove('open'));
 </script>
 </body>
 </html>
-```
