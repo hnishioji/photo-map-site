@@ -119,7 +119,7 @@ const modalClose = document.getElementById('modalClose');
 let positions = {};
 let photos = [];
 
-Promise.all([
+//Promise.all([
  fetch('positions.json')
   .then(r=>r.json())
   .then(()=>console.log("positions OK"))
@@ -130,7 +130,7 @@ fetch('photos.json')
   .then(()=>console.log("photos OK"))
   .catch(e=>console.error("photos NG", e));
 
-});
+//});
 
 function renderMarkers(){
   Object.keys(positions).forEach(AA=>{
