@@ -119,18 +119,18 @@ const modalClose = document.getElementById('modalClose');
 let positions = {};
 let photos = [];
 
-//Promise.all([
- fetch('positions.json')
-  .then(r=>r.json())
-  .then(()=>console.log("positions OK"))
-  .catch(e=>console.error("positions NG", e));
-
-fetch('photos.json')
-  .then(r=>r.json())
-  .then(()=>console.log("photos OK"))
-  .catch(e=>console.error("photos NG", e));
-
-//});
+// データ読み込み
+Promise.all([
+  fetch('positions.json').then(r=>r.json()),
+  fetch('photos.json').then(r=>r.json())
+]).then(([pos, ph])=>{
+  positions = pos;
+  photos = ph;
+  renderMarkers();
+}).catch(err=>{
+  alert("positions.json または photos.json の読み込みに失敗しました");
+  console.error(err);
+});
 
 function renderMarkers(){
   Object.keys(positions).forEach(AA=>{
